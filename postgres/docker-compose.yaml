@@ -1,0 +1,22 @@
+version: "3.7"
+
+services:
+  postgres-db:
+    image: postgres:14
+    restart: unless-stopped
+    ports:
+    - "127.0.0.1:5432:5432"
+    volumes:
+      - ./pgdata/:/var/lib/postgresql/data
+    networks:
+      coffee-pipeline:
+    environment:
+      - POSTGRES_PASSWORD=enter1234
+      - POSTGRES-USER=postgres
+      - POSTGRES_HOST_AUTH_METHOD=trust
+
+networks:
+  coffee-pipeline:
+
+
+
