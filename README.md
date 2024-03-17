@@ -20,13 +20,16 @@
 
     1. Using your terminal or docker desktop (unfamiliar with this), start the container
 
+       Enter the 'Distributed-Cafe-Loyalty-System/postgres/' directory before running any commands. Docker compose is based heavily on what directory it belongs in and even names its containers based on the folder. 
+
        Simply running `docker-compose up -d` or `docker compose up -d` based on your version will start the container
        
        `docker compose down` or `docker-compose down` will shut down the container
 
-       It matter what folder the docker compose file is in. If you move it around the command might not work correctly
+       It matters what folder the docker compose file is in. If you move it around the command might not work correctly.
+       If you were in the correct folder, you should see a 'PGDATA' folder created in the postgres folder you ran the command from
 
-    2. Checking your container is running correctly
+    3. Checking your container is running correctly
 
        if you run `docker container ls` you should see something like
 
@@ -43,7 +46,7 @@
        This means any python application or sql based command line tool can be used to interact with the DB.
 
 
-4. Interacting with your Database
+5. Interacting with your Database
 
     1. Through Docker
 
