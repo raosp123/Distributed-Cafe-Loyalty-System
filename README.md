@@ -56,7 +56,8 @@
         Then run the command `psql -U postgres -h localhost -p 5432`
 
     3. Through Python
-        *ref tutorial: https://www.postgresqltutorial.com/postgresql-python/connect/, warning, do not create any new databases if u follow the tutorial*
+
+       *ref tutorial: https://www.postgresqltutorial.com/postgresql-python/connect/, warning, do not create any new databases if u follow the tutorial*
 
         1. Install psycopg2 on your machine, with `pip install psycopg2`. Its good to use a python environment, if you do not know what that is, send me a message in chat.
 
