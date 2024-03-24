@@ -1,0 +1,8 @@
+populate database wtih sql file
+$ psql -d your_database (do not specify for default) -U username (postgres) -f path_to_your_sql_file
+
+
+tun run the fastapi app
+$ uvicorn backend:app --reload
+
+
