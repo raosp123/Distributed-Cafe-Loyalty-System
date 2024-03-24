@@ -13,6 +13,7 @@ class User(BaseModel):
 class Transaction(BaseModel):
     user_id: int
 
+
 @app.post("/users/")
 def api_create_user(user: User):
     try:
@@ -20,6 +21,7 @@ def api_create_user(user: User):
         return {"message": "User created successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/users/")
 def api_list_users():
@@ -29,6 +31,7 @@ def api_list_users():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.delete("/users/{user_id}")
 def api_delete_user(user_id: int):
     try:
@@ -36,6 +39,7 @@ def api_delete_user(user_id: int):
         return {"message": "User deleted successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/transactions/")
 def api_make_transaction(transaction: Transaction):
