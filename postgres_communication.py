@@ -1,20 +1,27 @@
 import psycopg2
 
-try:
-    conn = psycopg2.connect(
-        dbname="postgres",
-        user="postgres",
-        password="enter1234",
-        host="localhost"
-    )
-    print("Connected to the database")
-except psycopg2.Error as e:
-    print("Unable to connect to the database:", e)
-    exit()
+# Function to get database connection
+def get_db_connection():
+    try:
+        conn = psycopg2.connect(
+            dbname="postgres",
+            user="postgres",
+            password="enter1234",
+            host="localhost",
+            port="5432"
+        )
+        print("Connected to the database")
+    except psycopg2.Error as e:
+        print("Unable to connect to the database:", e)
+        exit()
+    cur = conn.cursor()
+    return conn, cur
 
-cur = conn.cursor()
+    
+# conn, cur = get_db_connection()
 
 def create_user(user_id, loyalty_card_id):
+    conn, cur = get_db_connection()
     try:
         cur.execute("SELECT * FROM loyalty_card WHERE loyalty_card_id = %s", (loyalty_card_id,))
         existing_card = cur.fetchone()
@@ -37,6 +44,7 @@ def create_user(user_id, loyalty_card_id):
         print("Error creating user:", e)
 
 def add_user_to_loyalty_group(user_id, loyalty_card_id):
+    conn, cur = get_db_connection()
     try:
         cur.execute("SELECT * FROM loyalty_card WHERE loyalty_card_id = %s", (loyalty_card_id,))
         existing_card = cur.fetchone()
@@ -56,6 +64,7 @@ def add_user_to_loyalty_group(user_id, loyalty_card_id):
         print("Error creating user:", e)
 
 def delete_user(user_id):
+    conn, cur = get_db_connection()
     try:
         cur.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
         user_details = cur.fetchone()
@@ -82,6 +91,7 @@ def delete_user(user_id):
         print("Error deleting user:", e)
 
 def make_transaction(user_id):
+    conn, cur = get_db_connection()
     try:
         cur.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
         user_details = cur.fetchone()
@@ -90,16 +100,17 @@ def make_transaction(user_id):
             cur.execute("UPDATE loyalty_card SET num_transactions = num_transactions + 1 WHERE loyalty_card_id = %s", (loyalty_card_id,))
             cur.execute("SELECT num_transactions FROM loyalty_card WHERE loyalty_card_id = %s", (loyalty_card_id,))
             print("Num {} ".format(cur.fetchone()))
-            give_coupon(loyalty_card_id)
+            give_coupon(loyalty_card_id, conn, cur)
+            print("Transaction added successfully")
         else:
             print("User with user ID {} does not exist".format(user_id))
+            print("Transaction failed")
         conn.commit()
-        print("Transaction added successfully")
     except psycopg2.Error as e:
         conn.rollback()
         print("Error deleting user:", e)
 
-def give_coupon(loyalty_card_id):
+def give_coupon(loyalty_card_id, conn, cur):
     try:
         cur.execute("SELECT * FROM loyalty_card WHERE loyalty_card_id = %s", (loyalty_card_id,))
         existing_card = cur.fetchone()
@@ -116,21 +127,23 @@ def give_coupon(loyalty_card_id):
 
 
 def list_users():
+    conn, cur = get_db_connection()
     try:
         cur.execute("SELECT * FROM users")
     
         rows = cur.fetchall()
-        for row in rows:
-            print(row)
+        # for row in rows:
+        #     print(row)
+        return rows
     except psycopg2.Error as e:
         print("Error executing SQL query:", e)
 
 
-create_user(333,15)
-list_users()
-delete_user(333)
-list_users()
-make_transaction(111)
+# create_user(333,15)
+# list_users()
+# delete_user(333)
+# list_users()
+# make_transaction(111)
 
-cur.close()
-conn.close()
+# cur.close()
+# conn.close()
