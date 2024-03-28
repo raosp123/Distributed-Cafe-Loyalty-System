@@ -1,23 +1,66 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
 from pydantic import BaseModel
+from fastapi.security import OAuth2PasswordRequestForm
+from passlib.context import CryptContext
+from pydantic import BaseModel
+
 import postgres_communication
 
 app = FastAPI()
 
-# conn, cur = postgres_communication.get_db_connection()
+SECRET_KEY = "b3e7b3b3e7b3b3e7b3e7"
+ALGORITHM = "HS256"
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+class TokenData(BaseModel):
+    user_id: int
+
 
 class User(BaseModel):
     user_id: int
+    password: str
     loyalty_card_id: int
 
 class Transaction(BaseModel):
     user_id: int
 
 
-@app.post("/users/")
+def hash_password(password: str):
+    return pwd_context.hash(password)
+
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+def verify_token(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: int = payload.get("user_id")
+        if user_id is None:
+            raise HTTPException(status_code=400, detail="Invalid token")
+        token_data = TokenData(user_id=user_id)
+    except JWTError:
+        raise HTTPException(status_code=400, detail="Invalid token")
+    return token_data
+
+def get_current_user(token_data: TokenData = Depends(verify_token)):
+    user = postgres_communication.get_user(token_data.user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+@app.post("/create/user/")
 def api_create_user(user: User):
     try:
-        postgres_communication.create_user(user.user_id, user.loyalty_card_id)
+        hashed_password = hash_password(user.password)
+        postgres_communication.create_user(user.user_id, user.loyalty_card_id, hashed_password)
         return {"message": "User created successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -12,11 +12,11 @@ services:
       coffee-pipeline:
     environment:
       - POSTGRES_PASSWORD=enter1234
-      - POSTGRES-USER=postgres
+      - POSTGRES_USER=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust
 
 networks:
   coffee-pipeline:
-
+    
 
 

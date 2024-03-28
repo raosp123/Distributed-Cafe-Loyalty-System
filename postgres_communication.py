@@ -20,7 +20,7 @@ def get_db_connection():
     
 # conn, cur = get_db_connection()
 
-def create_user(user_id, loyalty_card_id):
+def create_user(user_id, loyalty_card_id, hashed_password):
     conn, cur = get_db_connection()
     try:
         cur.execute("SELECT * FROM loyalty_card WHERE loyalty_card_id = %s", (loyalty_card_id,))
@@ -36,7 +36,7 @@ def create_user(user_id, loyalty_card_id):
         else:
             cur.execute("INSERT INTO loyalty_card (loyalty_card_id, num_transactions, num_users) VALUES (%s, 0, 1)", (loyalty_card_id,))
 
-        cur.execute("INSERT INTO users (user_id, loyalty_card_id) VALUES (%s, %s)", (user_id, loyalty_card_id))
+        cur.execute("INSERT INTO users (user_id, loyalty_card_id, hashed_password) VALUES (%s, %s)", (user_id, loyalty_card_id))
         conn.commit()
         print("User created successfully")
     except psycopg2.Error as e:
