@@ -1,6 +1,36 @@
 # Distributed Coffee Loyalty System
 
 
+## Pipeline setup
+
+1. setup fastAPI
+
+2. setup Postgres
+
+3. run `docker compose -f postgres/docker-compose.yaml up -d` to stat the postgres container
+
+4. run `uvicorn backend:app --reload` to start the fast-api server
+
+5. run `psql -d your_database (do not specify for default) -U username (postgres) -h localhost -f path_to_your_sql_file` to fill your database with tables
+
+6. make a post request to the server with `curl -X POST http://localhost:8000/create/user/ -d [data]`
+
+
+
+## FastApi
+
+### Setup
+
+1. setup python venv
+
+2. install requirements.txt
+
+3. for me I needed to run `pip install uvicorn[standard]` also
+
+### Commands
+
+1. start backend server with
+
 
 ## Postgres
 

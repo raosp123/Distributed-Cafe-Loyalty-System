@@ -6,7 +6,7 @@ CREATE TABLE loyalty_card (
 
 CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
-    loyalty_card_id INTEGER,,
+    loyalty_card_id INTEGER,
     hashedpassword VARCHAR(255) NOT NULL,
     FOREIGN KEY (loyalty_card_id) REFERENCES loyalty_card (loyalty_card_id) ON DELETE SET NULL
 );
