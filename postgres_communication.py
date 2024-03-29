@@ -1,20 +1,40 @@
 import psycopg2
 
 # Function to get database connection
-def get_db_connection():
-    try:
-        conn = psycopg2.connect(
-            dbname="postgres",
-            user="postgres",
-            password="enter1234",
-            host="localhost",
-            port="5432"
-        )
-        print("Connected to the database")
-    except psycopg2.Error as e:
-        print("Unable to connect to the database:", e)
-        exit()
-    cur = conn.cursor()
+def get_db_connection(db_type="write"):
+
+    #if we want to access the read replica
+    if db_type=="read":
+        try:
+            conn = psycopg2.connect(
+                dbname="postgres",
+                user="postgres",
+                password="enter1234",
+                host="localhost",
+                port="5433"
+            )
+            print("Connected to the database")
+        except psycopg2.Error as e:
+            print("Unable to connect to the database, Read-only replica has not been created yet:", e)
+            exit()
+        cur = conn.cursor()
+    #access the master DB
+    else:
+        try:
+            conn = psycopg2.connect(
+                dbname="postgres",
+                user="postgres",
+                password="enter1234",
+                host="localhost",
+                port="5432"
+            )
+            print("Connected to the database")
+        except psycopg2.Error as e:
+            print("Unable to connect to the database:", e)
+            exit()
+        cur = conn.cursor()
+        print("write")
+
     return conn, cur
 
     
@@ -139,7 +159,7 @@ def list_users():
         print("Error executing SQL query:", e)
 
 
-create_user(333,15, "test")
+#create_user(333,15, "test")
 # list_users()
 # delete_user(333)
 # list_users()
