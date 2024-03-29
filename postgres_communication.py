@@ -36,7 +36,7 @@ def create_user(user_id, loyalty_card_id, hashed_password):
         else:
             cur.execute("INSERT INTO loyalty_card (loyalty_card_id, num_transactions, num_users) VALUES (%s, 0, 1)", (loyalty_card_id,))
 
-        cur.execute("INSERT INTO users (user_id, loyalty_card_id, hashed_password) VALUES (%s, %s)", (user_id, loyalty_card_id))
+        cur.execute("INSERT INTO users (user_id, loyalty_card_id, hashed_password) VALUES (%s, %s, %s)", (user_id, loyalty_card_id, hashed_password))
         conn.commit()
         print("User created successfully")
     except psycopg2.Error as e:
@@ -139,7 +139,7 @@ def list_users():
         print("Error executing SQL query:", e)
 
 
-# create_user(333,15)
+create_user(333,15, "test")
 # list_users()
 # delete_user(333)
 # list_users()
