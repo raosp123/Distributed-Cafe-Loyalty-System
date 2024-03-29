@@ -13,7 +13,22 @@
 
 5. run `psql -d your_database (do not specify for default) -U username (postgres) -h localhost -f path_to_your_sql_file` to fill your database with tables
 
-6. make a post request to the server with `curl -X POST http://localhost:8000/create/user/ -d [data]`
+6. make a post request to the server with `curl -X POST http://localhost:8000/create/user/ -d [data]` where data is
+
+```
+`curl -X 'POST' \
+  'http://localhost:8000/create/user/' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "user_id": 0,
+  "password": "string",
+  "loyalty_card_id": 0
+}'`
+
+```
+
+
 
 
 
