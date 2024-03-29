@@ -11,10 +11,10 @@ CREATE TABLE users (
     FOREIGN KEY (loyalty_card_id) REFERENCES loyalty_card (loyalty_card_id) ON DELETE SET NULL
 );
 
-CREATE TABLE coupon_card_relation (
-    relation_id SERIAL PRIMARY KEY,
+
+CREATE TABLE coupon (
+    coupon_id SERIAL PRIMARY KEY AUTOINCREMENT,
+    coupon_value INTEGER NOT NULL,
     loyalty_card_id INTEGER NOT NULL,
-    coupon_id INTEGER NOT NULL,
-    FOREIGN KEY (loyalty_card_id) REFERENCES loyalty_card (loyalty_card_id) ON DELETE CASCADE,
-    CHECK (coupon_id IN (1, 2))
+    FOREIGN KEY (loyalty_card_id) REFERENCES loyalty_card (loyalty_card_id) ON DELETE SET NULL
 );

@@ -136,10 +136,10 @@ def give_coupon(loyalty_card_id, conn, cur):
         existing_card = cur.fetchone()
         num_transactions = existing_card[1]
         if(num_transactions % 7 == 0):
-            cur.execute("INSERT INTO coupon_card_relation (loyalty_card_id, coupon_id) VALUES (%s, %s)", (loyalty_card_id, 2))
+            cur.execute("INSERT INTO coupon coupon_value,loyalty_card_id VALUES (%s, %s)", (20, loyalty_card_id))
             print("High coupon received")
         elif (num_transactions % 4 == 0):
-            cur.execute("INSERT INTO coupon_card_relation (loyalty_card_id, coupon_id) VALUES (%s, %s)", (loyalty_card_id, 1))
+            cur.execute("INSERT INTO coupon_value,loyalty_card_id VALUES (%s, %s)", (10, loyalty_card_id))
             print("Low coupon received")
     except psycopg2.Error as e:
         conn.rollback()
@@ -158,6 +158,25 @@ def list_users():
     except psycopg2.Error as e:
         print("Error executing SQL query:", e)
 
+def get_coupons(loyalty_card_id, conn, cur):
+    try:
+        cur.execute("SELECT * FROM coupon WHERE loyalty_card_id = %s", (loyalty_card_id,))
+        rows = cur.fetchall()
+        return rows
+    except psycopg2.Error as e:
+        print("Error executing SQL query:", e)
+
+def use_coupon(coupon_id, conn, cur):
+    
+    try:
+        cur.execute("DELETE FROM coupon WHERE coupon_id = %s", (coupon_id,))
+        conn.commit()
+        print("Coupon used successfully")
+    except psycopg2.Error as e:
+        if e is psycopg2.errors.lookup('23503'):
+            print("Coupon already used or does not exist")
+        conn.rollback()
+        print("Error deleting coupon:", e)
 
 #create_user(333,15, "test")
 # list_users()
