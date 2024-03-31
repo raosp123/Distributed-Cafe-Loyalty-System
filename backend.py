@@ -65,7 +65,6 @@ def api_create_user(user: User):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @app.get("/users/")
 def api_list_users():
     try:
@@ -74,6 +73,21 @@ def api_list_users():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/coupons/{loyalty_card_id}")
+def read_coupons(loyalty_card_id: int):
+    try:
+        coupons = postgres_communication.get_coupons(loyalty_card_id)
+        return coupons
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/usecoupons/{loyalty_card_id}/{coupon_value}")
+def use_coupons(loyalty_card_id: int, coupon_value: int):
+    try:
+        result = postgres_communication.use_coupon(loyalty_card_id, coupon_value)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.delete("/users/{user_id}")
 def api_delete_user(user_id: int):

@@ -13,7 +13,7 @@ CREATE TABLE users (
 
 
 CREATE TABLE coupon (
-    coupon_id SERIAL PRIMARY KEY AUTOINCREMENT,
+    coupon_id SERIAL PRIMARY KEY,
     coupon_value INTEGER NOT NULL,
     loyalty_card_id INTEGER NOT NULL,
     FOREIGN KEY (loyalty_card_id) REFERENCES loyalty_card (loyalty_card_id) ON DELETE SET NULL
