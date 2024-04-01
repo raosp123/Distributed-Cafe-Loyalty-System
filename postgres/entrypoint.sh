@@ -11,7 +11,7 @@ if [[ -n $DATABASE_TYPE ]]; then
     if [[ "$DATABASE_TYPE" = 'primary' ]] ; then
         echo "Setting up initial DB"
 
-        exec docker-entrypoint.sh postgres
+        exec docker-entrypoint.sh postgres -c config_file=/etc/postgresql/postgresql.conf -c hba_file=/etc/postgresql/pg_hba.conf
 
         #run primary replication slot scripts
 
@@ -29,6 +29,8 @@ if [[ -n $DATABASE_TYPE ]]; then
             echo 'Replica initialized, starting database now'  
 
         fi
-        exec docker-entrypoint.sh postgres
+
+        exec docker-entrypoint.sh postgres -c config_file=/etc/postgresql/postgresql.conf
+
     fi
 fi

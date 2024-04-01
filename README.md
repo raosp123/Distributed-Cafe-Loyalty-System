@@ -155,27 +155,9 @@
 
 ### Replication
 
-!DISCLAIMER - The following below is done automatically, this is just for transparency!
+1. When you start the containers, you can see two databases running now
 
-0. Modified docker compose to have a second database container
-
-1. Setup postgres conf file for primary and replica:
-
-    Modify these files if we need other features
-
-    See postgres/postgres-confs/
-
-
-2. Create Replication slot on primary
-
-    `SELECT pg_create_physical_replication_slot('replication_slot');` creates replication slot
-
-    entrypoint script file initializes the DB with initial values from the primary if its empty, otherwise, it relies on its replication configuration which is standard
-    start replication, pointing at replica slot `pg_basebackup --pgdata=/var/lib/postgresql/data -R --slot=replication_slot --host=postgres-db-primary --port=5432` 
-
-3. 
-
-
+2. write database is accessed at port 5432, read is at 5433
 
 
 
@@ -183,3 +165,11 @@
 
 
 1. `SELECT * FROM pg_replication_slots;` -> view replication slots and their status (on primary)
+
+2. `SELECT pg_create_physical_replication_slot('replication_slot');` creates replication slot
+
+3. `pg_basebackup --pgdata=/var/lib/postgresql/data -R --slot=replication_slot --host=postgres-db-primary --port=5432` 
+
+
+
+

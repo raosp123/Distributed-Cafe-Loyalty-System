@@ -10,8 +10,8 @@ services:
       - ./pgdata/:/var/lib/postgresql/data
       - ./postgres-confs/primary.conf:/etc/postgresql/postgresql.conf
       - ./db-init:/docker-entrypoint-initdb.d
-      - ./postgres-confs/primary_pg_hba.conf:/etc/postgresql/pg_hba.conf
-      - ./entrypoint.sh:/opt/entrypoint.sh
+      - ./postgres-confs/pg_hba.conf:/etc/postgresql/pg_hba.conf
+      - ./entrypoint.sh/:/opt/entrypoint.sh
     networks:
       coffee-pipeline:
     environment:
@@ -19,6 +19,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust
       - DATABASE_TYPE=primary
+    command: ["bin/sh", "-c", "chmod +x /opt/entrypoint.sh; ./opt/entrypoint.sh"]
 
   postgres-db-replica:
     image: postgres:14
@@ -33,11 +34,11 @@ services:
       coffee-pipeline:
     environment:
       - POSTGRES_PASSWORD=enter1234
+      - PGAPPNAME=replica_1
       - POSTGRES_USER=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust
       - DATABASE_TYPE=replica
-    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
-
+    command: ["bin/sh", "-c", "chmod +x /opt/entrypoint.sh; ./opt/entrypoint.sh"]
 
 networks:
   coffee-pipeline:
