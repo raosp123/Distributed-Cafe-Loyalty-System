@@ -1,3 +1,4 @@
 postgres/pgdata
+postgres/pgdata-replica
 venv/
 __pycache__/

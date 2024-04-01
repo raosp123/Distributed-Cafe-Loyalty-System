@@ -1,19 +1,43 @@
 version: "3.7"
 
 services:
-  postgres-db:
+  postgres-db-primary:
     image: postgres:14
     restart: unless-stopped
     ports:
     - "127.0.0.1:5432:5432"
     volumes:
       - ./pgdata/:/var/lib/postgresql/data
+      - ./postgres-confs/primary.conf:/etc/postgresql/postgresql.conf
+      - ./db-init:/docker-entrypoint-initdb.d
+      - ./postgres-confs/primary_pg_hba.conf:/etc/postgresql/pg_hba.conf
+      - ./entrypoint.sh:/opt/entrypoint.sh
     networks:
       coffee-pipeline:
     environment:
       - POSTGRES_PASSWORD=enter1234
       - POSTGRES_USER=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust
+      - DATABASE_TYPE=primary
+
+  postgres-db-replica:
+    image: postgres:14
+    restart: unless-stopped
+    ports:
+    - "127.0.0.1:5433:5432"
+    volumes:
+      - ./pgdata-replica/:/var/lib/postgresql/data
+      - ./entrypoint.sh/:/opt/entrypoint.sh
+      - ./postgres-confs/replica.conf:/etc/postgresql/postgresql.conf
+    networks:
+      coffee-pipeline:
+    environment:
+      - POSTGRES_PASSWORD=enter1234
+      - POSTGRES_USER=postgres
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - DATABASE_TYPE=replica
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+
 
 networks:
   coffee-pipeline:

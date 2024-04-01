@@ -1,0 +1,34 @@
+#!/bin/bash
+
+echo "hello"
+
+set -x
+
+if [[ -n $DATABASE_TYPE ]]; then
+
+	echo "you made it here, $DATABASE_TYPE "
+
+    if [[ "$DATABASE_TYPE" = 'primary' ]] ; then
+        echo "Setting up initial DB"
+
+        exec docker-entrypoint.sh postgres
+
+        #run primary replication slot scripts
+
+    elif [[ "$DATABASE_TYPE" = "replica" ]]; then
+
+	    echo "hello2"
+        # if replica hasn't been initialized already
+        if [[ -z "$(ls -A /var/lib/postgresql/data/)" ]] ; then
+
+            until pg_basebackup --pgdata=/var/lib/postgresql/data -R -U postgres --slot=replication_slot --host=postgres-db-primary --port=5432
+            do
+                echo 'waiting for primary to startup'
+                sleep 3
+            done
+            echo 'Replica initialized, starting database now'  
+
+        fi
+        exec docker-entrypoint.sh postgres
+    fi
+fi
