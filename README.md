@@ -1,5 +1,11 @@
 # Distributed Coffee Loyalty System
 
+## Windows Compatibility Issues
+
+Sometimes you will get an error with the docker mounts that something isn't working.
+
+Current solution is to open the script file that is not working correctly in VScode, then change the Line Ending format on the bottom right of your VScode windows from CRLF -> LF, then save the file. It should work afterwards
+
 
 ## Pipeline setup
 
@@ -157,9 +163,14 @@
 
 1. When you start the containers, you can see two databases running now
 
+```
+CONTAINER ID   IMAGE         COMMAND                  CREATED        STATUS        PORTS                      NAMES
+56d2ce5ea474   postgres:14   "docker-entrypoint.s…"   45 hours ago   Up 27 hours   127.0.0.1:5432->5432/tcp   postgres-postgres-db-primary-1
+035e7700570e   postgres:14   "docker-entrypoint.s…"   45 hours ago   Up 27 hours   127.0.0.1:5433->5432/tcp   postgres-postgres-db-replica-1
+
+```
+
 2. write database is accessed at port 5432, read is at 5433
-
-
 
 #### Commands
 
