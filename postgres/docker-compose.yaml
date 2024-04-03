@@ -40,6 +40,27 @@ services:
       - DATABASE_TYPE=replica
     command: ["bin/sh", "-c", "chmod +x /opt/entrypoint.sh; ./opt/entrypoint.sh"]
 
+  # postgres-db-shard:
+  #   image: postgres:14
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - postgres-db-primary
+  #   ports:
+  #   - "127.0.0.1:5434:5432"
+  #   volumes:
+  #     - ./pgdata-shard/:/var/lib/postgresql/data
+  #     - ./entrypoint.sh/:/opt/entrypoint.sh
+  #     - ./postgres-confs/shard.conf:/etc/postgresql/postgresql.conf
+  #   networks:
+  #     coffee-pipeline:
+  #   environment:
+  #     - POSTGRES_PASSWORD=enter1234
+  #     - PGAPPNAME=shard_1
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_HOST_AUTH_METHOD=trust
+  #     - DATABASE_TYPE=shard
+  #   command: ["bin/sh", "-c", "chmod +x /opt/entrypoint.sh; ./opt/entrypoint.sh"]
+
 networks:
   coffee-pipeline:
     
