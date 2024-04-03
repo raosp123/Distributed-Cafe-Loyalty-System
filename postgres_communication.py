@@ -127,14 +127,12 @@ def make_transaction(user_id, coupon_value=None):
 
             if coupon_value is not None:
                 print("coupon value", coupon_value)
-                cur.execute("SELECT COUNT(*) FROM coupon WHERE loyalty_card_id = %s AND coupon_value = %s", (loyalty_card_id, coupon_value))
-                coupon_count = cur.fetchone()[0]
-                if coupon_count > 0:
-                    print("coupon_count", coupon_count)
-                    cur.execute("""DELETE FROM coupon WHERE ctid IN (SELECT ctid FROM coupon WHERE loyalty_card_id = %s AND coupon_value = %s LIMIT 1) RETURNING 1""", (loyalty_card_id, coupon_value))
+                cur.execute("DELETE FROM coupon WHERE ctid IN (SELECT ctid FROM coupon WHERE loyalty_card_id = %s AND coupon_value = %s FOR UPDATE SKIP LOCKED LIMIT 1 ) RETURNING 1", (loyalty_card_id, coupon_value))
+                deleted_rows = cur.fetchone()[0]
+                if deleted_rows == 1:
                     print("Coupon successfully used")
                 else:
-                    raise ValueError(f"No coupon of value {coupon_value} found for loyalty card {loyalty_card_id}")
+                    raise ValueError(f"No available coupon of value {coupon_value} found for loyalty card {loyalty_card_id}")
 
             cur.execute("UPDATE loyalty_card SET num_transactions = num_transactions + 1 WHERE loyalty_card_id = %s", (loyalty_card_id,))
             cur.execute("SELECT num_transactions FROM loyalty_card WHERE loyalty_card_id = %s", (loyalty_card_id,))
@@ -189,3 +187,64 @@ def get_coupons(loyalty_card_id):
     except psycopg2.Error as e:
         print("Error fetching coupons:", e)
         return None
+
+import threading
+
+def test_select_lock_select():
+    def run_query(thread_id):
+        conn, cur = get_db_connection() 
+        try:
+            cur.execute("BEGIN")
+            cur.execute("SELECT * FROM coupon WHERE loyalty_card_id = %s AND coupon_value = %s FOR UPDATE SKIP LOCKED LIMIT 1", (456, 20))
+            selected_coupon = cur.fetchone()
+            print(f"Thread {thread_id}: Selected coupon: {selected_coupon}")
+            cur.execute("COMMIT")
+        except Exception as e:
+            print(f"Thread {thread_id}: Error: {e}")
+            cur.execute("ROLLBACK") 
+        finally:
+            conn.close() 
+
+    num_threads = 4
+
+    threads = []
+    for i in range(num_threads):
+        thread = threading.Thread(target=run_query, args=(i,))
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+# Run the test
+# test_select_lock_select()
+
+
+def test_select_lock_delete():
+    def run_query(thread_id):
+        conn, cur = get_db_connection()
+        try:
+            cur.execute("BEGIN")
+            cur.execute("DELETE FROM coupon WHERE ctid = (SELECT ctid FROM coupon WHERE loyalty_card_id = %s AND coupon_value = %s FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING *", (456, 20))
+            deleted_row = cur.fetchone()
+            print(f"Thread {thread_id}: Deleted row: {deleted_row}")
+            cur.execute("COMMIT")
+        except Exception as e:
+            print(f"Thread {thread_id}: Error: {e}")
+            cur.execute("ROLLBACK") 
+        finally:
+            conn.close()  
+    num_threads = 4
+
+    threads = []
+    for i in range(num_threads):
+        thread = threading.Thread(target=run_query, args=(i,))
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+# Run the test
+#test_select_lock_delete()
+
