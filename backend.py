@@ -66,7 +66,6 @@ def api_create_user(user: User):
 
 @app.get("/users/")
 def api_list_users():
-    logging.debug("Received a request")
     try:
         users = postgres_communication.list_users()
         return users
@@ -93,7 +92,6 @@ def api_delete_user(user_id: int):
 @app.post("/transactions/")
 def api_make_transaction(transaction: Transaction):
     try:
-        print("Coupon Value:", transaction.coupon_value)
         postgres_communication.make_transaction(transaction.user_id, transaction.coupon_value)
         return {"message": "Transaction recorded successfully"}
     except Exception as e:
