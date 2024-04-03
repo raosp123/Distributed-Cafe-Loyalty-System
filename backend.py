@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from fastapi.security import OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 from pydantic import BaseModel
+from typing import Optional
 
 import postgres_communication
 
@@ -15,12 +16,10 @@ ALGORITHM = "HS256"
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class TokenData(BaseModel):
     user_id: int
-
 
 class User(BaseModel):
     user_id: int
@@ -29,7 +28,7 @@ class User(BaseModel):
 
 class Transaction(BaseModel):
     user_id: int
-
+    coupon_value: Optional[int] = None
 
 def hash_password(password: str):
     return pwd_context.hash(password)
@@ -67,6 +66,7 @@ def api_create_user(user: User):
 
 @app.get("/users/")
 def api_list_users():
+    logging.debug("Received a request")
     try:
         users = postgres_communication.list_users()
         return users
@@ -78,14 +78,6 @@ def read_coupons(loyalty_card_id: int):
     try:
         coupons = postgres_communication.get_coupons(loyalty_card_id)
         return coupons
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/usecoupons/{loyalty_card_id}/{coupon_value}")
-def use_coupons(loyalty_card_id: int, coupon_value: int):
-    try:
-        result = postgres_communication.use_coupon(loyalty_card_id, coupon_value)
-        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -101,7 +93,8 @@ def api_delete_user(user_id: int):
 @app.post("/transactions/")
 def api_make_transaction(transaction: Transaction):
     try:
-        postgres_communication.make_transaction(transaction.user_id)
+        print("Coupon Value:", transaction.coupon_value)
+        postgres_communication.make_transaction(transaction.user_id, transaction.coupon_value)
         return {"message": "Transaction recorded successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

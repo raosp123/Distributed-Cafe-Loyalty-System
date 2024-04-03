@@ -116,13 +116,26 @@ def delete_user(user_id):
         conn.rollback()
         print("Error deleting user:", e)
 
-def make_transaction(user_id):
+def make_transaction(user_id, coupon_value=None):
     conn, cur = get_db_connection()
     try:
         cur.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
         user_details = cur.fetchone()
         if user_details:
             loyalty_card_id = user_details[1]
+            print("loyalty_card_id", loyalty_card_id)
+
+            if coupon_value is not None:
+                print("coupon value", coupon_value)
+                cur.execute("SELECT COUNT(*) FROM coupon WHERE loyalty_card_id = %s AND coupon_value = %s", (loyalty_card_id, coupon_value))
+                coupon_count = cur.fetchone()[0]
+                if coupon_count > 0:
+                    print("coupon_count", coupon_count)
+                    cur.execute("""DELETE FROM coupon WHERE ctid IN (SELECT ctid FROM coupon WHERE loyalty_card_id = %s AND coupon_value = %s LIMIT 1) RETURNING 1""", (loyalty_card_id, coupon_value))
+                    print("Coupon successfully used")
+                else:
+                    raise ValueError(f"No coupon of value {coupon_value} found for loyalty card {loyalty_card_id}")
+
             cur.execute("UPDATE loyalty_card SET num_transactions = num_transactions + 1 WHERE loyalty_card_id = %s", (loyalty_card_id,))
             cur.execute("SELECT num_transactions FROM loyalty_card WHERE loyalty_card_id = %s", (loyalty_card_id,))
             updated_num_transactions = cur.fetchone()[0]
@@ -176,27 +189,3 @@ def get_coupons(loyalty_card_id):
     except psycopg2.Error as e:
         print("Error fetching coupons:", e)
         return None
-
-def use_coupon(loyalty_card_id, coupon_value):
-    conn, cur = get_db_connection()
-    try:
-        cur.execute("SELECT COUNT(*) FROM users WHERE loyalty_card_id = %s", (loyalty_card_id,))
-        loyalty_card_exists = cur.fetchone()[0]
-
-        if loyalty_card_exists:
-            cur.execute("SELECT COUNT(*) FROM coupon WHERE loyalty_card_id = %s AND coupon_value = %s", (loyalty_card_id, coupon_value))
-            coupon_exists = cur.fetchone()[0]
-
-            if coupon_exists:
-                cur.execute("DELETE FROM coupon WHERE loyalty_card_id = %s AND coupon_value = %s", (loyalty_card_id, coupon_value))
-                conn.commit()
-                print("Coupon successfully used")
-            else:
-                raise ValueError(f"No coupon of value {coupon_value} found for loyalty card {loyalty_card_id}")
-        else:
-            raise ValueError("Loyalty card {} does not exist".format(loyalty_card_id))
-
-    except psycopg2.Error as e:
-        conn.rollback()
-        print("Error using coupon:", e)
-        return {"message": "Error using coupon. Please try again later."}
