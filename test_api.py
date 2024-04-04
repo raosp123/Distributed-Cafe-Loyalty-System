@@ -74,11 +74,40 @@ def immediate_access_after_coupon_is_created():
 
             
 #use coupon of same value when only 1 coupons are available
-    
+def use_coupon_transaction(transaction):
+    url=DOMAIN_URL+'transactions/'
+    response = requests.post(url, json=transaction)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return {"error": response.text}
+
+def use_coupon_of_same_value():
+    url=DOMAIN_URL+'transactions/'
+    #fetch coupons of user 1 and 2 to check if it is credited with new coupon
+    response = requests.get(DOMAIN_URL+'coupons/1')
+    print(response.json())
+    response = requests.get(DOMAIN_URL+'coupons/1')
+    print(response.json())
+
+    transactions=[{'user_id': 1, 'coupon_value': 10},
+    {'user_id': 2, 'coupon_value': 10}]
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+    # Use list comprehension to start the tasks and collect the Future objects
+        futures = [executor.submit(use_coupon_transaction, transaction) for transaction in transactions]
+
+        # Wait for all tasks to complete and get their results
+        results = [future.result() for future in concurrent.futures.as_completed(futures)]
+
+    print(results)
+    # for transaction in transactions:
+        # response = requests.post(url, json=transaction)
+        # if response.status_code == 200:
+            # print(response.json())
+        # else:
+            # print({"error": response.text}) 
 
 
-
-    
 # possible to create 5 users with same loyalty card id
     # Expected false
 # scenario 1: get coupons of two users from same loyalty card
