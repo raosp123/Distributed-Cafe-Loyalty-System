@@ -165,7 +165,7 @@ def give_coupon(loyalty_card_id, conn, cur):
         print("Error giving coupon:", e)
 
 def list_users():
-    conn, cur = get_db_connection()
+    conn, cur = get_db_connection("read")
     try:
         cur.execute("SELECT * FROM users")
         rows = cur.fetchall()
@@ -174,7 +174,7 @@ def list_users():
         print("Error executing SQL query:", e)
 
 def get_coupons(loyalty_card_id):
-    conn, cur = get_db_connection()
+    conn, cur = get_db_connection("read")
     try:
         cur.execute("SELECT COUNT(*) FROM users WHERE loyalty_card_id = %s", (loyalty_card_id,))
         loyalty_card_exists = cur.fetchone()[0]
