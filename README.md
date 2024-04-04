@@ -50,7 +50,23 @@ Current solution is to open the script file that is not working correctly in VSc
 
 ### Commands
 
-1. start backend server with
+1. start backend server with uvicorn backend:app --reload
+
+2. curl request at localhost:8000/docs or using
+
+```
+`curl -X 'POST' \
+  'http://localhost:8000/create/user/' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "user_id": 0,
+  "password": "string",
+  "loyalty_card_id": 0
+}'`
+
+
+```
 
 
 ## Postgres
