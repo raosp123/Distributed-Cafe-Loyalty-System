@@ -35,23 +35,26 @@ def get_db_connection(db_type="write"):
         cur = conn.cursor()
         print("write")
 
-    return conn, cur
+    return conn, cur        
 
 def create_user(user_id, loyalty_card_id, hashed_password):
     conn, cur = get_db_connection()
     try:
+        print(f"Attempting to create user with ID: {user_id}, Loyalty Card ID: {loyalty_card_id}, Hashed Password: {hashed_password}")
         cur.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
         existing_user = cur.fetchone()
         if existing_user:
             raise ValueError("User with user ID {} already exists".format(user_id))
 
-        cur.execute("SELECT * FROM loyalty_card WHERE loyalty_card_id = %s", (loyalty_card_id,))
+        cur.execute("SELECT * FROM loyalty_card WHERE loyalty_card_id = %s FOR UPDATE", (loyalty_card_id,))
         existing_card = cur.fetchone()
 
         if existing_card:
             num_users = existing_card[2]
+            print(f"User {user_id}: Loyalty card {loyalty_card_id} exists with {num_users} amount of user")
             if num_users < 4:
                 cur.execute("UPDATE loyalty_card SET num_users = num_users + 1 WHERE loyalty_card_id = %s", (loyalty_card_id,))
+                print(f"User {user_id}: added to loyalty card.")
             else:
                 raise ValueError("Maximum number of users reached for loyalty card {}".format(loyalty_card_id))
         else:
@@ -95,8 +98,6 @@ def delete_user(user_id):
             print("loyalty card id: ", loyalty_card_id)
             cur.execute("SELECT * FROM loyalty_card WHERE loyalty_card_id = %s", (loyalty_card_id,))
             existing_card = cur.fetchone()
-
-            print(existing_card)
 
             if existing_card:
                 num_users = existing_card[2]
@@ -248,3 +249,35 @@ def test_select_lock_delete():
 # Run the test
 #test_select_lock_delete()
 
+def simulate_concurrent_transactions():
+    num_threads = 2
+    users = [123, 1234]
+    threads = []
+
+    for i in range(num_threads):
+        thread = threading.Thread(target=make_transaction, args=(users[i], 20)) 
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+# Run the simulation
+# simulate_concurrent_transactions()
+
+def simulate_concurrent_user_creation():
+    num_threads = 3
+    users = [(12345, 456, 'password1'), (123456, 456, 'password2'), (1234567, 456, 'password2')]
+    threads = []
+
+    for i in range(num_threads):
+        user_id, loyalty_card_id, hashed_password = users[i]
+        thread = threading.Thread(target=create_user, args=(user_id, loyalty_card_id, hashed_password))
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+# Run the simulation
+# simulate_concurrent_user_creation()
