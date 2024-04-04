@@ -48,6 +48,7 @@ def create_user(user_id, loyalty_card_id, hashed_password):
 
         cur.execute("SELECT * FROM loyalty_card WHERE loyalty_card_id = %s FOR UPDATE", (loyalty_card_id,))
         existing_card = cur.fetchone()
+        print("existing card: ", existing_card)
 
         if existing_card:
             num_users = existing_card[2]
@@ -58,14 +59,17 @@ def create_user(user_id, loyalty_card_id, hashed_password):
             else:
                 raise ValueError("Maximum number of users reached for loyalty card {}".format(loyalty_card_id))
         else:
+            print(f"User {user_id}: Loyalty card {loyalty_card_id} does not exist. Creating new loyalty card.")
             cur.execute("INSERT INTO loyalty_card (loyalty_card_id, num_transactions, num_users) VALUES (%s, 0, 1)", (loyalty_card_id,))
-
+            print(f"User {user_id}: Loyalty card {loyalty_card_id} created.")
         cur.execute("INSERT INTO users (user_id, loyalty_card_id, hashed_password) VALUES (%s, %s, %s)", (user_id, loyalty_card_id, hashed_password))
         conn.commit()
         print("User created successfully")
+        return "User created successfully"
     except psycopg2.Error as e:
         conn.rollback()
         print("Error creating user:", e)
+        return "Error creating user:"+e
 
 def add_user_to_loyalty_group(user_id, loyalty_card_id):
     conn, cur = get_db_connection()
@@ -165,7 +169,7 @@ def give_coupon(loyalty_card_id, conn, cur):
         print("Error giving coupon:", e)
 
 def list_users():
-    conn, cur = get_db_connection("read")
+    conn, cur = get_db_connection()
     try:
         cur.execute("SELECT * FROM users")
         rows = cur.fetchall()
