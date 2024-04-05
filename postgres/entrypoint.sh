@@ -35,11 +35,5 @@ if [[ -n $DATABASE_TYPE ]]; then
         fi
 
         exec docker-entrypoint.sh postgres -c config_file=/etc/postgresql/postgresql.conf
-                    
-
-
-    elif [[ "$DATABASE_TYPE" = "shard" ]]; then
-        echo "do something"
-
-    fi
+    fi                
 fi
