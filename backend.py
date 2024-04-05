@@ -59,8 +59,8 @@ def get_current_user(token_data: TokenData = Depends(verify_token)):
 def api_create_user(user: User):
     try:
         hashed_password = hash_password(user.password)
-        postgres_communication.create_user(user.user_id, user.loyalty_card_id, hashed_password)
-        return {"message": "User created successfully"}
+        msg = postgres_communication.create_user(user.user_id, user.loyalty_card_id, hashed_password)
+        return {"message": msg}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -92,7 +92,7 @@ def api_delete_user(user_id: int):
 @app.post("/transactions/")
 def api_make_transaction(transaction: Transaction):
     try:
-        postgres_communication.make_transaction(transaction.user_id, transaction.coupon_value)
-        return {"message": "Transaction recorded successfully"}
+        msg = postgres_communication.make_transaction(transaction.user_id, transaction.coupon_value)
+        return {"message": msg}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

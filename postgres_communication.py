@@ -55,17 +55,22 @@ def create_user(user_id, loyalty_card_id, hashed_password):
             if num_users < 4:
                 cur.execute("UPDATE loyalty_card SET num_users = num_users + 1 WHERE loyalty_card_id = %s", (loyalty_card_id,))
                 print(f"User {user_id}: added to loyalty card.")
+                cur.execute("INSERT INTO users (user_id, loyalty_card_id, hashed_password) VALUES (%s, %s, %s)", (user_id, loyalty_card_id, hashed_password))
+                conn.commit()
+                msg = (f"User {user_id} created successfully")
+                return msg
             else:
                 raise ValueError("Maximum number of users reached for loyalty card {}".format(loyalty_card_id))
         else:
             cur.execute("INSERT INTO loyalty_card (loyalty_card_id, num_transactions, num_users) VALUES (%s, 0, 1)", (loyalty_card_id,))
-
-        cur.execute("INSERT INTO users (user_id, loyalty_card_id, hashed_password) VALUES (%s, %s, %s)", (user_id, loyalty_card_id, hashed_password))
-        conn.commit()
-        print("User created successfully")
+            cur.execute("INSERT INTO users (user_id, loyalty_card_id, hashed_password) VALUES (%s, %s, %s)", (user_id, loyalty_card_id, hashed_password))
+            conn.commit()
+            msg = (f"User {user_id} created successfully")
+            return msg
     except psycopg2.Error as e:
         conn.rollback()
-        print("Error creating user:", e)
+        msg = f"Error creating user {user_id}::", e
+        return msg
 
 def add_user_to_loyalty_group(user_id, loyalty_card_id):
     conn, cur = get_db_connection()
@@ -141,19 +146,23 @@ def make_transaction(user_id, coupon_value=None):
             print("Updated num_transactions for loyalty_card_id {}: {}".format(loyalty_card_id, updated_num_transactions))
             
             give_coupon(loyalty_card_id, conn, cur)
-            print("Transaction added successfully")
+            msg = (f"User {user_id}: Transaction added successfully")
+            conn.commit()
+            return msg
         else:
             raise ValueError("User with user ID {} does not exist".format(user_id))
-            print("Transaction failed")
-        conn.commit()
+            msg = (f"User {user_id}: Transaction failed")
+            return msg
     except psycopg2.Error as e:
         conn.rollback()
         print("Error making transaction:", e)
 
 def give_coupon(loyalty_card_id, conn, cur):
+    print("give coupon")
     try:
         cur.execute("SELECT num_transactions FROM loyalty_card WHERE loyalty_card_id = %s", (loyalty_card_id,))
         num_transactions = cur.fetchone()[0] 
+        print("num_transactions: ", num_transactions)
         if(num_transactions % 7 == 0):
             cur.execute("INSERT INTO coupon (coupon_value, loyalty_card_id) VALUES (%s, %s)", (20, loyalty_card_id))
             print("High coupon received")
