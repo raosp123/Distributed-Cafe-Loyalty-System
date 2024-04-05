@@ -29,6 +29,7 @@ services:
     volumes:
       - ./pgdata-replica/:/var/lib/postgresql/data
       - ./entrypoint.sh/:/opt/entrypoint.sh
+      - ./pg_ping.sh/:/opt/pg_ping.sh
       - ./postgres-confs/replica.conf:/etc/postgresql/postgresql.conf
     networks:
       coffee-pipeline:
