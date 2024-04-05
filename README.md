@@ -19,7 +19,7 @@ Current solution is to open the script file that is not working correctly in VSc
 
 5. run `psql -d your_database (do not specify for default) -U username (postgres) -h localhost -f path_to_your_sql_file` to fill your database with tables
 
-6. make a post request to the server with `curl -X POST http://localhost:8000/create/user/ -d [data]` where data is
+6. make a post request to the server with `curl -X POST http://localhost:8000/create/user/ -d [data]` where data is or go to localhost:8000/docs to do it with a web GUI
 
 ```
 `curl -X 'POST' \
@@ -35,9 +35,6 @@ Current solution is to open the script file that is not working correctly in VSc
 ```
 
 
-
-
-
 ## FastApi
 
 ### Setup
@@ -48,11 +45,12 @@ Current solution is to open the script file that is not working correctly in VSc
 
 3. for me I needed to run `pip install uvicorn[standard]` also
 
+4. start backend server with uvicorn backend:app --reload
+
 ### Commands
 
-1. start backend server with uvicorn backend:app --reload
 
-2. curl request at localhost:8000/docs or using
+. curl request at localhost:8000/docs or using
 
 ```
 `curl -X 'POST' \
