@@ -10,7 +10,7 @@ def get_db_connection(db_type="write"):
                 dbname="postgres",
                 user="postgres",
                 password="enter1234",
-                host="postgres-postgres-db-replica-1",
+                host="host.docker.internal",
                 port="5433"
             )
             print("Connected to the database")
@@ -25,7 +25,7 @@ def get_db_connection(db_type="write"):
                 dbname="postgres",
                 user="postgres",
                 password="enter1234",
-                host="postgres-postgres-db-primary-1",
+                host="host.docker.internal",
                 port="5432"
             )
             print("Connected to the database")
