@@ -7,10 +7,10 @@ def get_db_connection(db_type="write"):
     if db_type=="read":
         try:
             conn = psycopg2.connect(
-                dbname="postgres-postgres-db-replica-1",
+                dbname="postgres",
                 user="postgres",
                 password="enter1234",
-                host="localhost",
+                host="postgres-postgres-db-replica-1",
                 port="5433"
             )
             print("Connected to the database")
@@ -22,10 +22,10 @@ def get_db_connection(db_type="write"):
     else:
         try:
             conn = psycopg2.connect(
-                dbname="postgres-postgres-db-primary-1",
+                dbname="postgres",
                 user="postgres",
                 password="enter1234",
-                host="localhost",
+                host="postgres-postgres-db-primary-1",
                 port="5432"
             )
             print("Connected to the database")
