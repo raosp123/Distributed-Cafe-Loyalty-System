@@ -1,0 +1,47 @@
+version: '3.7'
+
+services:
+  api1:
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - "8001:8000"
+    networks:
+      - coffee-pipeline
+
+  api2:
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - "8002:8000"
+    networks:
+      - coffee-pipeline
+
+  api3:
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - "8003:8000"
+    networks:
+      - coffee-pipeline
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - api1
+      - api2
+      - api3
+    networks:
+      - coffee-pipeline
+
+networks:
+  coffee-pipeline:
+    external:
+      name: postgres_coffee-pipeline
