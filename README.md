@@ -15,11 +15,13 @@ Current solution is to open the script file that is not working correctly in VSc
 
 3. run `docker compose -f postgres/docker-compose.yaml up -d` to stat the postgres container
 
-4. run `uvicorn backend:app --reload` to start the fast-api server
+4. run `docker-compose -f load_balancer/docker-compose.yml up -d` to start the NGINX and 3 backend servers (on ports 8001, 8002, 8003)
 
-5. run `psql -d your_database (do not specify for default) -U username (postgres) -h localhost -f path_to_your_sql_file` to fill your database with tables
+5. [OPTIONAL] run `uvicorn backend:app --reload` to start a fast-api server on port 8000
 
-6. make a post request to the server with `curl -X POST http://localhost:8000/create/user/ -d [data]` where data is or go to localhost:8000/docs to do it with a web GUI
+6. run `psql -d your_database (do not specify for default) -U username (postgres) -h localhost -f path_to_your_sql_file` to fill your database with tables
+
+7. make a post request to the server with `curl -X POST http://localhost:8000/create/user/ -d [data]` where data is or go to localhost:8000/docs to do it with a web GUI
 
 ```
 `curl -X 'POST' \
