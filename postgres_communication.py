@@ -1,10 +1,38 @@
 import psycopg2
 
 # Function to get database connection
-def get_db_connection(db_type="write"):
+REPLICA_STATUS = True
 
+def check_replica_promoted():
+    global REPLICA_STATUS 
+    try:
+        conn = psycopg2.connect(
+            dbname="postgres",
+            user="postgres",
+            password="enter1234",
+            host="localhost",
+            port="5433"
+        )
+        # print("Connected to the database")
+    except psycopg2.Error as e:
+        # print("Unable to connect to the database, Read-only replica has not been created yet:", e)
+        exit()
+    cur = conn.cursor()
+    cur.execute("SELECT pg_is_in_recovery()")
+    replica_status = cur.fetchone()[0]
+    if replica_status == False:
+        print("Replica is promoted")
+        REPLICA_STATUS = False
+    else:
+        print("Replica is not promoted")
+        REPLICA_STATUS = True 
+    conn.close()
+    return not replica_status
+
+def get_db_connection(db_type="write"):
+    print("Replica status",REPLICA_STATUS)
     #if we want to access the read replica
-    if db_type=="read":
+    if db_type=="read" or REPLICA_STATUS==False:
         try:
             conn = psycopg2.connect(
                 dbname="postgres",
@@ -31,7 +59,17 @@ def get_db_connection(db_type="write"):
             print("Connected to the database")
         except psycopg2.Error as e:
             print("Unable to connect to the database:", e)
-            exit()
+            if check_replica_promoted():
+                conn = psycopg2.connect(
+                    dbname="postgres",
+                    user="postgres",
+                    password="enter1234",
+                    host="localhost",
+                    port="5433"
+                )
+                print("Connected to the promoted database")
+            else:
+                exit()
         cur = conn.cursor()
         print("write")
 

@@ -39,7 +39,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust
       - DATABASE_TYPE=replica
-    command: ["bin/sh", "-c", "chmod +x /opt/entrypoint.sh; ./opt/entrypoint.sh"]
+    command: ["bin/sh", "-c", "chmod +x /opt/entrypoint.sh; ./opt/entrypoint.sh; "]
 
   # postgres-db-shard:
   #   image: postgres:14
