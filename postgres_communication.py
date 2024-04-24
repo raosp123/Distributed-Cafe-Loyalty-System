@@ -172,7 +172,10 @@ def make_transaction(user_id, coupon_value=None):
             if coupon_value is not None:
                 print("coupon value", coupon_value)
                 cur.execute("DELETE FROM coupon WHERE ctid IN (SELECT ctid FROM coupon WHERE loyalty_card_id = %s AND coupon_value = %s FOR UPDATE SKIP LOCKED LIMIT 1 ) RETURNING 1", (loyalty_card_id, coupon_value))
-                deleted_rows = cur.fetchone()[0]
+                try:
+                    deleted_rows = cur.fetchone()[0]
+                except TypeError as e:
+                    deleted_rows = 0
                 if deleted_rows == 1:
                     print("Coupon successfully used")
                 else:
@@ -194,6 +197,7 @@ def make_transaction(user_id, coupon_value=None):
     except psycopg2.Error as e:
         conn.rollback()
         print("Error making transaction:", e)
+        return e
 
 def give_coupon(loyalty_card_id, conn, cur):
     print("give coupon")

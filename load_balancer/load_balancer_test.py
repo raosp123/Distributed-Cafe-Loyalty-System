@@ -11,9 +11,9 @@ def delete_docker_compose_service(service_name):
         print(f'Failed to remove service: {service_name}. Error: {e.output}')
 
 # Call the function with the service name
-delete_docker_compose_service('postgres-db-primary')
+delete_docker_compose_service('api3')
 
-time.sleep(120)
+time.sleep(10)
 
 import requests
 
@@ -25,8 +25,8 @@ def create_user(user):
     else:
         return {"error": response.text}
     
-data= [{'user_id': 10,
+data= {'user_id': 11,
     'password': 'abcd',
-    'loyalty_card_id': 4},]
+    'loyalty_card_id': 5}
 
 print(create_user(data))

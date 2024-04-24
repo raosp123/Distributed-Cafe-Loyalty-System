@@ -1,10 +1,38 @@
 import psycopg2
 
 # Function to get database connection
-def get_db_connection(db_type="write"):
+REPLICA_STATUS = True
 
+def check_replica_promoted():
+    global REPLICA_STATUS 
+    try:
+        conn = psycopg2.connect(
+            dbname="postgres",
+            user="postgres",
+            password="enter1234",
+            host="localhost",
+            port="5433"
+        )
+        # print("Connected to the database")
+    except psycopg2.Error as e:
+        # print("Unable to connect to the database, Read-only replica has not been created yet:", e)
+        exit()
+    cur = conn.cursor()
+    cur.execute("SELECT pg_is_in_recovery()")
+    replica_status = cur.fetchone()[0]
+    if replica_status == False:
+        print("Replica is promoted")
+        REPLICA_STATUS = False
+    else:
+        print("Replica is not promoted")
+        REPLICA_STATUS = True 
+    conn.close()
+    return not replica_status
+
+def get_db_connection(db_type="write"):
+    print("Replica status",REPLICA_STATUS)
     #if we want to access the read replica
-    if db_type=="read":
+    if db_type=="read" or REPLICA_STATUS==False:
         try:
             conn = psycopg2.connect(
                 dbname="postgres",
@@ -31,7 +59,17 @@ def get_db_connection(db_type="write"):
             print("Connected to the database")
         except psycopg2.Error as e:
             print("Unable to connect to the database:", e)
-            exit()
+            if check_replica_promoted():
+                conn = psycopg2.connect(
+                    dbname="postgres",
+                    user="postgres",
+                    password="enter1234",
+                    host="localhost",
+                    port="5433"
+                )
+                print("Connected to the promoted database")
+            else:
+                exit()
         cur = conn.cursor()
         print("write")
 
@@ -121,6 +159,7 @@ def delete_user(user_id):
     except psycopg2.Error as e:
         conn.rollback()
         print("Error deleting user:", e)
+        
 
 def make_transaction(user_id, coupon_value=None):
     conn, cur = get_db_connection()
@@ -134,7 +173,10 @@ def make_transaction(user_id, coupon_value=None):
             if coupon_value is not None:
                 print("coupon value", coupon_value)
                 cur.execute("DELETE FROM coupon WHERE ctid IN (SELECT ctid FROM coupon WHERE loyalty_card_id = %s AND coupon_value = %s FOR UPDATE SKIP LOCKED LIMIT 1 ) RETURNING 1", (loyalty_card_id, coupon_value))
-                deleted_rows = cur.fetchone()[0]
+                try:
+                    deleted_rows = cur.fetchone()[0]
+                except TypeError as e:
+                    deleted_rows = 0
                 if deleted_rows == 1:
                     print("Coupon successfully used")
                 else:
@@ -156,6 +198,7 @@ def make_transaction(user_id, coupon_value=None):
     except psycopg2.Error as e:
         conn.rollback()
         print("Error making transaction:", e)
+        return {"error": str(e)}
 
 def give_coupon(loyalty_card_id, conn, cur):
     print("give coupon")
