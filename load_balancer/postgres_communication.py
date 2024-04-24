@@ -10,7 +10,7 @@ def check_replica_promoted():
             dbname="postgres",
             user="postgres",
             password="enter1234",
-            host="localhost",
+            host="host.docker.internal",
             port="5433"
         )
         # print("Connected to the database")
@@ -64,7 +64,7 @@ def get_db_connection(db_type="write"):
                     dbname="postgres",
                     user="postgres",
                     password="enter1234",
-                    host="localhost",
+                    host="host.docker.internal",
                     port="5433"
                 )
                 print("Connected to the promoted database")
@@ -159,7 +159,6 @@ def delete_user(user_id):
     except psycopg2.Error as e:
         conn.rollback()
         print("Error deleting user:", e)
-        
 
 def make_transaction(user_id, coupon_value=None):
     conn, cur = get_db_connection()
@@ -198,7 +197,7 @@ def make_transaction(user_id, coupon_value=None):
     except psycopg2.Error as e:
         conn.rollback()
         print("Error making transaction:", e)
-        return {"error": str(e)}
+        return e
 
 def give_coupon(loyalty_card_id, conn, cur):
     print("give coupon")
